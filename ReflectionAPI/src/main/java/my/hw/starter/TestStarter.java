@@ -35,32 +35,17 @@ public class TestStarter {
         List<Method> testMethods = getTestMethods(testClass);
 
         getTestOnlyMethods(testMethods).forEach(m -> {
+            results.put(m, null);
             try {
-                getRepeatableMethods(testMethods, Before.class).forEach(mb -> {
-                    try {
-                        mb.setAccessible(true);
-                        mb.invoke(object);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        results.put(m, e);
-                    }
-                });
 
+                execTestMethods(object, m, getWrapMethods(testMethods, Before.class), results);
                 try {
                     m.setAccessible(true);
                     m.invoke(object);
-                    results.put(m, null);
                 } catch (InvocationTargetException e) {
                     results.put(m, e.getTargetException());
                 }
-
-                getRepeatableMethods(testMethods, After.class).forEach(ma -> {
-                    try {
-                        ma.setAccessible(true);
-                        ma.invoke(object);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        results.put(m, e);
-                    }
-                });
+                execTestMethods(object, m, getWrapMethods(testMethods, After.class), results);
 
             } catch (Exception e) {
                 results.put(m, e);
@@ -91,19 +76,22 @@ public class TestStarter {
                 .collect(Collectors.toList());
     }
 
-    private static List<Method> getRepeatableMethods(List<Method> testMethods, Class<? extends Annotation> repeatableAnnotation) {
+    private static List<Method> getWrapMethods(List<Method> testMethods, Class<? extends Annotation> repeatableAnnotation) {
         return testMethods.stream()
                 .filter(m -> m.isAnnotationPresent(repeatableAnnotation))
                 .collect(Collectors.toList());
     }
 
-    private static boolean execBefore(Method[] methodsBefore) {
-
-        return true;
-    }
-
-    private static boolean execAfter(Method[] methodsAfter) {
-
-        return true;
+    private static void execTestMethods(Object testClass, Method method, List<Method> testMethods, Map<Method, Throwable> results) {
+        testMethods.forEach(mb -> {
+            try {
+                mb.setAccessible(true);
+                mb.invoke(testClass);
+            } catch (IllegalAccessException e) {
+                results.put(method, e);
+            } catch (InvocationTargetException e) {
+                results.put(method, e.getTargetException());
+            }
+        });
     }
 }
