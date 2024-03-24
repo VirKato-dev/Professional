@@ -19,14 +19,16 @@ public class DemoTest {
 
     @After
     public void after() {
-        System.out.println("After test ("+ global +")\n---");
+        System.out.println("After test (" + global + ")\n---");
     }
 
+    @Test(order = 2)
     public void test1() {
         global++;
         System.out.println("Test method 1");
     }
 
+    @Test(order = 1)
     private void test2() {
         System.out.println("Test method2");
         global++;

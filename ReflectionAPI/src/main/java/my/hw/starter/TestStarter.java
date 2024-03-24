@@ -7,10 +7,7 @@ import my.hw.annotations.Test;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -73,6 +70,11 @@ public class TestStarter {
     private static List<Method> getTestOnlyMethods(List<Method> testMethods) {
         return testMethods.stream()
                 .filter(m -> !m.isAnnotationPresent(Before.class) && !m.isAnnotationPresent(After.class))
+                .sorted((o1, o2) -> {
+                    int order1 = o1.isAnnotationPresent(Test.class) ? o1.getAnnotation(Test.class).order() : 10;
+                    int order2 = o2.isAnnotationPresent(Test.class) ? o2.getAnnotation(Test.class).order() : 10;
+                    return order1 - order2 < 0 ? 1 : order1 == order2 ? 0 : -1;
+                })
                 .collect(Collectors.toList());
     }
 
