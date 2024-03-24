@@ -26,10 +26,10 @@ public class TestStarter {
 
     public static boolean execute(Class<?> testClass)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Object object = testClass.getConstructor().newInstance();
+        final Object object = testClass.getConstructor().newInstance();
 
-        Map<Method, Throwable> results = new HashMap<>();
-        List<Method> testMethods = getTestMethods(testClass);
+        final Map<Method, Throwable> results = new HashMap<>();
+        final List<Method> testMethods = getTestMethods(testClass);
 
         getTestOnlyMethods(testMethods).forEach(m -> {
             results.put(m, null);
@@ -73,7 +73,7 @@ public class TestStarter {
                 .sorted((o1, o2) -> {
                     int order1 = o1.isAnnotationPresent(Test.class) ? o1.getAnnotation(Test.class).order() : 10;
                     int order2 = o2.isAnnotationPresent(Test.class) ? o2.getAnnotation(Test.class).order() : 10;
-                    return order1 - order2 < 0 ? 1 : order1 == order2 ? 0 : -1;
+                    return order1 - order2 < 0 ? -1 : order1 == order2 ? 0 : 1;
                 })
                 .collect(Collectors.toList());
     }
